@@ -1,7 +1,12 @@
 #include "raylib.h"
 #include "raymath.h"
+#include "Character.h"
+#include "Prop.h"
+#include "Enemy.h"
 
-int main() 
+//DO NOT USE COLLISION! AND RENDER!
+
+int main()
 {
     const int window_width = 384;
     const int window_height = 384;
@@ -9,46 +14,71 @@ int main()
 
     Texture2D map = LoadTexture("nature_tileset/WorldMap.png");
     Vector2 mapPos{0.0, 0.0};
-    // load knight character
-    Texture2D knight = LoadTexture("characters/knight_idle_spritesheet.png");
-    Vector2 knightPos{
-        (float)window_width / 2.0f - 4.0f *(0.5f*(float)knight.width/6.0f), 
-        (float)window_height/2.0f - 4.0f*(0.5f*(float)knight.height)
-        };
-   
+    const float mapScale{4.0f};
 
-    float speed{4.0};
+    // intance of the Character class
+    Character knight(window_width, window_height);
+
+    // enemy variables
+    Vector2 enemyPos = {window_width, window_height};
+    Texture2D idle_enemy = LoadTexture("characters/goblin_idle_spritesheet.png");
+    Texture2D run_enemy = LoadTexture("characters/goblin_run_spritesheet.png");
+
+    // instance of the Enemy class
+    Enemy goblin(enemyPos, idle_enemy, run_enemy);
+
+    goblin.setTarget(&knight);
+
+    // load the prop textures
+    // Prop props[2]{
+    //     Prop{Vector2{600.f, 350.f}, LoadTexture("TextureFantasyTopDown/TX Plant.png")},
+    //     Prop{Vector2{200.f, 450.f}, LoadTexture("TextureFantasyTopDown/TX Plant.png")}
+    // };
 
     SetTargetFPS(60);
-    while(!WindowShouldClose())
+    while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(WHITE);
 
-        Vector2 direction{};
-        if(IsKeyDown(KEY_A))  direction.x -= 1.0;
-        if(IsKeyDown(KEY_D)) direction.x += 1.0;
-        if(IsKeyDown(KEY_W)) direction.y -= 1.0;
-        if(IsKeyDown(KEY_S)) direction.y += 1.0;
-        
-        if(Vector2Length(direction) != 0.0)
-        {
-            // set mapPos = mapPos - direction
-            
-            mapPos = Vector2Subtract(mapPos, Vector2Scale(Vector2Normalize(direction), speed));
-            
-        }
-       // draw the map
-        DrawTextureEx(map, mapPos, 0, 4.0, WHITE);
+        // -1.f before change
+        mapPos = Vector2Scale(knight.getWorldPos(), -1.f);
 
-        // draw knight character
-        Rectangle source{0.f, 0.f, (float)knight.width/6.f, (float)knight.height};
-        Rectangle dest{knightPos.x, knightPos.y, 4.0f*(float)knight.width/6.0f, 4.0f*(float)knight.height};
-        DrawTexturePro(knight, source, dest, Vector2{}, 0.f, WHITE);
+        // draw the map
+        DrawTextureEx(map, mapPos, 0, mapScale, WHITE);
+        
+
+        // draw the props
+        // for(auto prop : props)
+        // {
+        //     prop.Render(knight.getWorldPos());
+        // }
+
+        // update character animation frames.
+        knight.tick(GetFrameTime());
+
+        // check map bounds.
+        if(knight.getWorldPos().x < 0.f || 
+            knight.getWorldPos().y < 0.f ||
+            knight.getWorldPos().x + window_width > map.width * mapScale ||
+            knight.getWorldPos().y + window_height > map.height * mapScale)
+        {
+            knight.undoMovement();
+        }
+
+        // for(auto prop : props)
+        // {
+        //    if(CheckCollisionRecs(prop.getCollisionRec(knight.getWorldPos()), knight.getCollisionRec()))
+        //    {
+        //         knight.undoMovement();
+        //    }
+        // }
+
+        // update enemy animation frames.
+        goblin.tick(GetFrameTime());
 
         EndDrawing();
     }
-    UnloadTexture(knight);
+    //UnloadTexture(knight);
     CloseWindow();
-
 }
