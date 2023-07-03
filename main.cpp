@@ -3,8 +3,9 @@
 #include "Character.h"
 #include "Prop.h"
 #include "Enemy.h"
+#include <string>
 
-//DO NOT USE COLLISION! AND RENDER!
+// DO NOT USE COLLISION! AND RENDER!
 
 int main()
 {
@@ -20,14 +21,33 @@ int main()
     Character knight(window_width, window_height);
 
     // enemy variables
-    Vector2 enemyPos = {window_width, window_height};
+    Vector2 enemyPos = {800.f, 300.f}; // window width window height
     Texture2D idle_enemy = LoadTexture("characters/goblin_idle_spritesheet.png");
     Texture2D run_enemy = LoadTexture("characters/goblin_run_spritesheet.png");
 
     // instance of the Enemy class
     Enemy goblin(enemyPos, idle_enemy, run_enemy);
 
-    goblin.setTarget(&knight);
+    // slime variables
+    Vector2 slimePos = {500.f, 700.f};
+    Texture2D idle_slime = LoadTexture("characters/slime_idle_spritesheet.png");
+    Texture2D run_slime = LoadTexture("characters/slime_run_spritesheet.png");
+
+    Enemy slime{
+        slimePos,
+        idle_slime,
+        run_slime};
+
+    Enemy *enemies[]{
+        &goblin,
+        &slime,
+    };
+
+    for (auto enemy : enemies)
+    {
+        enemy->setTarget(&knight);
+    }
+
 
     // load the prop textures
     // Prop props[2]{
@@ -46,7 +66,6 @@ int main()
 
         // draw the map
         DrawTextureEx(map, mapPos, 0, mapScale, WHITE);
-        
 
         // draw the props
         // for(auto prop : props)
@@ -54,11 +73,24 @@ int main()
         //     prop.Render(knight.getWorldPos());
         // }
 
+        if (!knight.getAlive()) // character is not alive.
+        {
+            DrawText("GAME OVER!", 55.f, 45.f, 40, RED); // display game over.
+            EndDrawing();
+            continue;
+        }
+        else // character is alive.
+        {
+            std::string knightsHealth = "Health: ";
+            knightsHealth.append(std::to_string(knight.getHealth()), 0, 5);
+            DrawText(knightsHealth.c_str(), 55.f, 45.f, 40, RED); // display character health.
+        }
+
         // update character animation frames.
         knight.tick(GetFrameTime());
 
         // check map bounds.
-        if(knight.getWorldPos().x < 0.f || 
+        if (knight.getWorldPos().x < 0.f ||
             knight.getWorldPos().y < 0.f ||
             knight.getWorldPos().x + window_width > map.width * mapScale ||
             knight.getWorldPos().y + window_height > map.height * mapScale)
@@ -75,10 +107,25 @@ int main()
         // }
 
         // update enemy animation frames.
-        goblin.tick(GetFrameTime());
+        for (auto enemy : enemies)
+        {
+            enemy->tick(GetFrameTime());
+        }
+
+        // check for collision with weapon.
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            for (auto enemy : enemies)
+            {
+                if (CheckCollisionRecs(enemy->getCollisionRec(), knight.getWeaponCollisionRec()))
+                {
+                    enemy->setAlive(false);
+                }
+            }
+        }
 
         EndDrawing();
     }
-    //UnloadTexture(knight);
+    // UnloadTexture(knight);
     CloseWindow();
 }
