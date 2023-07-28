@@ -5,8 +5,6 @@
 #include "Enemy.h"
 #include <string>
 
-// DO NOT USE COLLISION! AND RENDER!
-
 int main()
 {
     const int window_width = 384;
@@ -21,7 +19,7 @@ int main()
     Character knight(window_width, window_height);
 
     // enemy variables
-    Vector2 enemyPos = {800.f, 300.f}; // window width window height
+    Vector2 enemyPos = {800.f, 300.f}; // window width and window height
     Texture2D idle_enemy = LoadTexture("characters/goblin_idle_spritesheet.png");
     Texture2D run_enemy = LoadTexture("characters/goblin_run_spritesheet.png");
 
@@ -33,14 +31,23 @@ int main()
     Texture2D idle_slime = LoadTexture("characters/slime_idle_spritesheet.png");
     Texture2D run_slime = LoadTexture("characters/slime_run_spritesheet.png");
 
+    // instance of the Enemy class 
     Enemy slime{
         slimePos,
         idle_slime,
         run_slime};
 
-    Enemy *enemies[]{
-        &goblin,
-        &slime,
+    // Enemy *enemies[]{
+    //     &goblin,
+    //     &slime
+    // };
+
+    Enemy* enemies[]{
+        new Enemy{Vector2{(32 * 24), (32 * 24)},idle_enemy,run_enemy},
+        new Enemy{Vector2{(32 * 50), (32 * 50)},idle_slime,run_slime},
+        new Enemy{Vector2{(32 * 1), (32 * 35)},idle_enemy,run_enemy},
+        new Enemy{Vector2{(32 * 75), (32 * 90)},idle_slime,run_slime},
+        new Enemy{Vector2{(32 * 90), (32 * 40)},idle_enemy,run_enemy}
     };
 
     for (auto enemy : enemies)
@@ -120,12 +127,17 @@ int main()
                 if (CheckCollisionRecs(enemy->getCollisionRec(), knight.getWeaponCollisionRec()))
                 {
                     enemy->setAlive(false);
+
                 }
             }
         }
 
         EndDrawing();
     }
-    // UnloadTexture(knight);
+
     CloseWindow();
+    for (auto enemy : enemies)
+    {
+        delete enemy;
+    }
 }

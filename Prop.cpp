@@ -2,6 +2,8 @@
 #include "raymath.h"
 #include "raylib.h"
 
+// Working on Prop Collision!
+
 Prop::Prop(Vector2 pos, Texture2D tex) :
     worldPos(pos),
     texture(tex)

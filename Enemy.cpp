@@ -9,7 +9,7 @@ Enemy::Enemy(Vector2 pos, Texture2D idle_texture, Texture2D run_texture)
     running = run_texture;
     width = texture.width/maxFrames;
     height = texture.height;
-    speed = 1.5f;
+    speed = 2.5f;
 }
 
 void Enemy::tick(float deltaTime)
