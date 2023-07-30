@@ -31,7 +31,7 @@ int main()
     Texture2D idle_slime = LoadTexture("characters/slime_idle_spritesheet.png");
     Texture2D run_slime = LoadTexture("characters/slime_run_spritesheet.png");
 
-    // instance of the Enemy class 
+    // instance of the Enemy class.
     Enemy slime{
         slimePos,
         idle_slime,
@@ -42,6 +42,7 @@ int main()
     //     &slime
     // };
 
+    // create an array of enemies.
     Enemy* enemies[]{
         new Enemy{Vector2{(32 * 24), (32 * 24)},idle_enemy,run_enemy},
         new Enemy{Vector2{(32 * 50), (32 * 50)},idle_slime,run_slime},
@@ -136,6 +137,7 @@ int main()
     }
 
     CloseWindow();
+    // deallocate memory.
     for (auto enemy : enemies)
     {
         delete enemy;
